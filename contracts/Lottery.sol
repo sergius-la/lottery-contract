@@ -4,7 +4,7 @@ pragma solidity >=0.4.22 <0.9.0;
 contract Lottery {
 
   address public manager;
-  address[] public players;
+  address[] private players;
 
   constructor() public {
     manager = msg.sender;
@@ -22,11 +22,21 @@ contract Lottery {
     public
     payable
     restricted
+    returns (address)
   {
     uint index = random() % players.length;
     address payable winner = address(uint160(players[index]));
     winner.transfer(address(this).balance);
     players = new address[](0);
+    return winner;
+  }
+  
+  function getPlayers() 
+    external
+    view
+    returns(address[] memory)
+  {
+      return players;
   }
 
   function random()
@@ -40,7 +50,7 @@ contract Lottery {
 
   modifier restricted()
   {
-    require(msg.sender == manager);
+    require(msg.sender == manager, "The executor mush be the contract owner");
     _;
   }
 }
